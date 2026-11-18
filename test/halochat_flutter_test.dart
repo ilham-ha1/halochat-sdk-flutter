@@ -138,6 +138,36 @@ void main() {
       );
     });
 
+    test('REJECTED keeps the server reason code and HTTP status', () async {
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        throw PlatformException(
+          code: 'REJECTED',
+          message: 'Rejected: 422',
+          details: {'status': 422, 'code': 'conversation_closed'},
+        );
+      });
+      await expectLater(
+        HaloChat.send('hi'),
+        throwsA(isA<HaloChatException>()
+            .having((e) => e.code, 'code', HaloChatErrorCode.rejected)
+            .having((e) => e.status, 'status', 422)
+            .having((e) => e.serverCode, 'serverCode', 'conversation_closed')
+            .having((e) => e.toString(), 'toString', contains('conversation_closed'))),
+      );
+    });
+
+    test('REJECTED without a reason in the body leaves serverCode null', () async {
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        throw PlatformException(code: 'REJECTED', message: 'Rejected: 400', details: {'status': 400, 'code': null});
+      });
+      await expectLater(
+        HaloChat.send('hi'),
+        throwsA(isA<HaloChatException>()
+            .having((e) => e.serverCode, 'serverCode', isNull)
+            .having((e) => e.toString(), 'toString', 'HaloChatException(rejected, Rejected: 400)')),
+      );
+    });
+
     test('unknown native code maps to unknown', () async {
       messenger.setMockMethodCallHandler(channel, (call) async {
         throw PlatformException(code: 'WAT');
