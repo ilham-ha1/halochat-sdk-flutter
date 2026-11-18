@@ -143,7 +143,13 @@ const _codeNames = {
 };
 
 class HaloChatException implements Exception {
-  const HaloChatException(this.code, this.message, {this.status, this.retryAfterSeconds});
+  const HaloChatException(
+    this.code,
+    this.message, {
+    this.status,
+    this.retryAfterSeconds,
+    this.serverCode,
+  });
 
   final HaloChatErrorCode code;
   final String? message;
@@ -152,6 +158,10 @@ class HaloChatException implements Exception {
   final int? status;
   final int? retryAfterSeconds;
 
+  /// The server's reason for a [HaloChatErrorCode.rejected]: the `error` string of the 4xx body
+  /// (native `rejected(status:code:)`), or null when the body had none.
+  final String? serverCode;
+
   factory HaloChatException.fromPlatform(PlatformException e) {
     final details = e.details is Map ? e.details as Map : const {};
     return HaloChatException(
@@ -159,9 +169,11 @@ class HaloChatException implements Exception {
       e.message,
       status: details['status'] as int?,
       retryAfterSeconds: details['retryAfterSeconds'] as int?,
+      serverCode: details['code'] as String?,
     );
   }
 
   @override
-  String toString() => 'HaloChatException(${code.name}, $message)';
+  String toString() =>
+      'HaloChatException(${code.name}, $message${serverCode == null ? '' : ', $serverCode'})';
 }

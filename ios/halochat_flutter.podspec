@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'halochat_flutter'
-  s.version          = '0.1.0'
+  s.version          = '0.1.2'
   s.summary          = 'Flutter bridge over the HaloChat core SDK (no built-in UI).'
   s.description      = <<-DESC
 Flutter bridge over the HaloChat core SDK: timeline stream, history, send, attachments, push.
